@@ -13,7 +13,7 @@ let%expect_test "Sending request with a closed client" =
   let%map () =
     with_client (fun client ->
       let%bind () = Client.close client in
-      Expect_test_helpers_async.require_does_raise_async (fun () ->
+      Expect_test_helpers_async.require_does_raise_async [%here] (fun () ->
         Nvim.get_current_buf [%here] client >>| ok_exn)
       |> Deferred.ok)
   in
@@ -35,7 +35,7 @@ let%expect_test "Sending notification with a closed client" =
   let%map () =
     with_client (fun client ->
       let%bind () = Client.close client in
-      Expect_test_helpers_async.require_does_raise_async (fun () ->
+      Expect_test_helpers_async.require_does_raise_async [%here] (fun () ->
         let open Expert.Notifier in
         notify [%here] client ~name:(`Viml "nvim_get_current_buf") ~type_:Func.unit
         >>| ok_exn)
@@ -73,7 +73,7 @@ let%expect_test "Sending response with a closed client" =
           ~f:(fun ~run_in_background:_ ~client:_ -> Deferred.Or_error.return ())
       in
       let channel = Client.channel client in
-      Expect_test_helpers_async.require_does_raise_async (fun () ->
+      Expect_test_helpers_async.require_does_raise_async [%here] (fun () ->
         Nvim.call_function
           [%here]
           client
@@ -117,7 +117,7 @@ let%expect_test "Client closes inside RPC" =
           ~f:(fun ~run_in_background:_ ~client -> Client.close client |> Deferred.ok)
       in
       let channel = Client.channel client in
-      Expect_test_helpers_async.require_does_raise_async (fun () ->
+      Expect_test_helpers_async.require_does_raise_async [%here] (fun () ->
         Nvim.call_function
           [%here]
           client

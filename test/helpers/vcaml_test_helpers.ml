@@ -300,7 +300,7 @@ module Test_ui = struct
       then Buffer.add_string buffer "├"
       else Buffer.add_string buffer "│";
       Array.iter row ~f:(fun string -> Buffer.add_string buffer string);
-      if String.equal (Array.last_exn row) "─"
+      if String.equal (Array.to_list row |> List.last_exn) "─"
       then Buffer.add_string buffer "┤"
       else Buffer.add_string buffer "│";
       Buffer.add_char buffer '\n');
@@ -634,7 +634,7 @@ let%expect_test "We cannot have two blocking RPCs with the same name" =
   let%map () =
     with_client (fun client ->
       register_dummy_rpc_handler client ~name:"test";
-      Expect_test_helpers_base.require_does_raise (fun () ->
+      Expect_test_helpers_base.require_does_raise [%here] (fun () ->
         register_dummy_rpc_handler client ~name:"test");
       Deferred.Or_error.return ())
   in
@@ -653,7 +653,7 @@ let%expect_test "We cannot have two async RPCs with the same name" =
   let%map () =
     with_client (fun client ->
       register_dummy_rpc_handler client ~name:"test";
-      Expect_test_helpers_base.require_does_raise (fun () ->
+      Expect_test_helpers_base.require_does_raise [%here] (fun () ->
         register_dummy_rpc_handler client ~name:"test");
       Deferred.Or_error.return ())
   in
