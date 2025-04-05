@@ -138,7 +138,10 @@ let%expect_test "set_client_info" =
             ; prerelease = Some false
             ; commit = Some "test_commit"
             }
-          ~attributes:(String.Map.of_alist_exn [ "attr1", "val1" ])
+          ~attributes:
+            { website = Some "github.com/janestreet/vcaml"
+            ; license = None
+            ; pid = Some 2116 }
           ~client_type:Embedder
           ()
       in

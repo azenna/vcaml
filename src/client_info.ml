@@ -97,11 +97,40 @@ module How_to_call_method = struct
       ~async:(conv (Type.to_msgpack Bool))
       ~nargs:
         (conv (function
-          | `Fixed n -> Msgpack.Int n
-          | `Inclusive_range (lo, hi) -> Array [ Int lo; Int hi ]))
+           | `Fixed n -> Msgpack.Int n
+           | `Inclusive_range (lo, hi) -> Array [ Int lo; Int hi ]))
     |> List.filter_opt
     |> String.Map.of_alist_exn
     |> Type.to_msgpack Dict
+  ;;
+end
+
+module Attributes = struct
+  type t =
+    { website : string option
+    ; license : string option
+    ; pid : int option
+    }
+  [@@deriving fields ~iterators:to_list, sexp_of]
+
+  let of_msgpack msgpack =
+    let open Or_error.Let_syntax in
+    let%bind map = Type.of_msgpack Dict msgpack in
+    let%bind website = find_and_convert map "website" (Type.of_msgpack String) in
+    let%bind license = find_and_convert map "license" (Type.of_msgpack String) in
+    let%bind pid = find_and_convert map "pid" (Type.of_msgpack Int) in
+    return { website; license; pid }
+  ;;
+
+  let to_msgpack_map t =
+    let conv typ field =
+      match Field.get field t with
+      | None -> None
+      | Some value -> Some (Field.name field, Type.to_msgpack typ value)
+    in
+    Fields.to_list ~website:(conv String) ~license:(conv String) ~pid:(conv Int)
+    |> List.filter_opt
+    |> String.Map.of_alist_exn
   ;;
 end
 
@@ -110,7 +139,7 @@ type t =
   ; version : Version.t option
   ; client_type : Client_type.t option
   ; methods : How_to_call_method.t String.Map.t
-  ; attributes : string String.Map.t
+  ; attributes : Attributes.t option
   }
 [@@deriving sexp_of]
 
@@ -118,12 +147,6 @@ let convert_methods msgpack =
   let open Or_error.Let_syntax in
   let%bind map = Type.of_msgpack Dict msgpack in
   map |> Map.map ~f:How_to_call_method.of_msgpack |> Map.combine_errors
-;;
-
-let convert_attributes msgpack =
-  let open Or_error.Let_syntax in
-  let%bind map = Type.of_msgpack Dict msgpack in
-  map |> Map.map ~f:(Type.of_msgpack String) |> Map.combine_errors
 ;;
 
 let of_msgpack msgpack =
@@ -140,9 +163,6 @@ let of_msgpack msgpack =
     find_and_convert map "methods" convert_methods
     >>| Option.value ~default:String.Map.empty
   in
-  let%bind attributes =
-    find_and_convert map "attributes" convert_attributes
-    >>| Option.value ~default:String.Map.empty
-  in
+  let%bind attributes = find_and_convert map "attributes" Attributes.of_msgpack in
   return { name; version; client_type; methods; attributes }
 ;;

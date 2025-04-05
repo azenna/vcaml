@@ -251,13 +251,18 @@ module Private = struct
       ; prerelease = None
       ; commit = None
       })
-    ?(attributes = String.Map.empty)
+    ?(attributes =
+        { Client_info.Attributes.website = None
+        ; license = None
+        ; pid = None
+        })
     ?(client_type = Client_info.Client_type.Remote)
     ()
     =
     let module M = Msgpack in
     let version = Client_info.Version.to_msgpack_map version in
     let client_type = Client_info.Client_type.to_string client_type in
+    let attributes = Client_info.Attributes.to_msgpack_map attributes in
     let methods =
       t.registered_methods ()
       |> Map.map ~f:(fun { callable_via } ->
@@ -273,7 +278,6 @@ module Private = struct
         in
         Client_info.How_to_call_method.to_msgpack { async; nargs = None })
     in
-    let attributes = Map.map attributes ~f:(fun attribute -> M.String attribute) in
     Nvim_internal.nvim_set_client_info
       ~name:t.name
       ~version

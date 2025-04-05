@@ -417,7 +417,7 @@ val set_client_info
   :  Source_code_position.t
   -> _ Client.t
   -> ?version:Client_info.Version.t
-  -> ?attributes:string String.Map.t
+  -> ?attributes:Client_info.Attributes.t
   -> ?client_type:Client_info.Client_type.t
   -> unit
   -> unit Deferred.Or_error.t

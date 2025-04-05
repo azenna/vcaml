@@ -32,13 +32,24 @@ module How_to_call_method : sig
   val to_msgpack : t -> Msgpack.t
 end
 
+module Attributes : sig
+  type t =
+    { website: string option
+    ; license: string option
+    ; pid: int option
+    }
+
+  val to_msgpack_map : t -> Msgpack.t String.Map.t
+end
+
+
 (** See `:h nvim_set_client_info` for details about this type. *)
 type t =
   { name : string option
   ; version : Version.t option
   ; client_type : Client_type.t option
   ; methods : How_to_call_method.t String.Map.t
-  ; attributes : string String.Map.t
+  ; attributes : Attributes.t option
   }
 [@@deriving sexp_of]
 
