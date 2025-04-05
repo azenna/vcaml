@@ -5,7 +5,7 @@ module Version : sig
     { major : int option
     ; minor : int option
     ; patch : int option
-    ; prerelease : string option
+    ; prerelease : bool option
     ; commit : string option
     }
 

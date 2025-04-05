@@ -135,7 +135,7 @@ let%expect_test "set_client_info" =
             { major = Some 1
             ; minor = Some 2
             ; patch = Some 3
-            ; prerelease = Some "test_prerelease"
+            ; prerelease = Some false
             ; commit = Some "test_commit"
             }
           ~attributes:(String.Map.of_alist_exn [ "attr1", "val1" ])

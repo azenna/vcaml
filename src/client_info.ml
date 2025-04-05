@@ -6,7 +6,7 @@ module Version = struct
     { major : int option
     ; minor : int option
     ; patch : int option
-    ; prerelease : string option
+    ; prerelease : bool option
     ; commit : string option
     }
   [@@deriving fields ~iterators:to_list, sexp_of]
@@ -16,7 +16,7 @@ module Version = struct
     let%bind major = find_and_convert map "major" (Type.of_msgpack Int) in
     let%bind minor = find_and_convert map "minor" (Type.of_msgpack Int) in
     let%bind patch = find_and_convert map "patch" (Type.of_msgpack Int) in
-    let%bind prerelease = find_and_convert map "prerelease" (Type.of_msgpack String) in
+    let%bind prerelease = find_and_convert map "prerelease" (Type.of_msgpack Bool) in
     let%bind commit = find_and_convert map "commit" (Type.of_msgpack String) in
     return { major; minor; patch; prerelease; commit }
   ;;
@@ -31,7 +31,7 @@ module Version = struct
       ~major:(conv Int)
       ~minor:(conv Int)
       ~patch:(conv Int)
-      ~prerelease:(conv String)
+      ~prerelease:(conv Bool)
       ~commit:(conv String)
     |> List.filter_opt
     |> String.Map.of_alist_exn
