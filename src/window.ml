@@ -196,6 +196,59 @@ module Config = struct
     ;;
   end
 
+  module Split = struct
+    module Direction = struct
+      type t =
+        | Left
+        | Right
+        | Above
+        | Below
+      [@@deriving sexp_of]
+
+      let to_msgpack : t -> Msgpack.t = function
+        | Left -> String "left"
+        | Right -> String "right"
+        | Above -> String "above"
+        | Below -> String "below"
+      ;;
+
+      let of_msgpack msgpack =
+        let open Or_error.Let_syntax in
+        match%bind Type.of_msgpack String msgpack with
+        | "left" -> Ok Left
+        | "right" -> Ok Right
+        | "above" -> Ok Above
+        | "below" -> Ok Below
+        | split_direction ->
+          Or_error.error_s
+            [%message "Failed to parse split direction in window config" split_direction]
+      ;;
+    end
+
+    type t =
+      { win : Or_current.t
+      ; direction : Direction.t
+      }
+    [@@deriving sexp_of]
+
+    let to_msgpack_map t =
+      let msgpack = [ "split", Direction.to_msgpack t.direction ] in
+      let msgpack =
+        match t.win with
+        | Current -> msgpack
+        | Id win -> ("win", Type.to_msgpack Window win) :: msgpack
+      in
+      String.Map.of_alist_exn msgpack
+    ;;
+
+    let of_msgpack_map map =
+      let open Or_error.Let_syntax in
+      let%bind win = find_or_error_and_convert map "win" Or_current.of_msgpack in
+      let%bind direction = find_or_error_and_convert map "split" Direction.of_msgpack in
+      return { win; direction }
+    ;;
+  end
+
   module Floating = struct
     module Corner = struct
       type t =
@@ -445,6 +498,7 @@ module Config = struct
   type t =
     | Floating of Floating.t
     | External of External.t
+    | Split of Split.t
   [@@deriving sexp_of]
 
   let of_msgpack_map map =
@@ -454,16 +508,22 @@ module Config = struct
       let%map config = External.of_msgpack_map map in
       Some (External config)
     | _ ->
-      (match Core.Map.find map "relative" with
-       | Some (String "") -> Ok None
+      (match Core.Map.find map "split" with
+       | Some (Msgpack.String _) ->
+         let%map config = Split.of_msgpack_map map in
+         Some (Split config)
        | _ ->
-         let%map config = Floating.of_msgpack_map map in
-         Some (Floating config))
+         (match Core.Map.find map "relative" with
+          | Some (String "") -> Ok None
+          | _ ->
+            let%map config = Floating.of_msgpack_map map in
+            Some (Floating config)))
   ;;
 
   let to_msgpack_map = function
     | Floating config -> Floating.to_msgpack_map config
     | External config -> External.to_msgpack_map config
+    | Split config -> Split.to_msgpack_map config
   ;;
 end
 
@@ -510,6 +570,10 @@ let open_external here client ?noautocmd () ~buffer ~enter ~config ~minimal_styl
   open_ here client ?noautocmd () ~buffer ~enter ~config:(External config) ~minimal_style
 ;;
 
+let open_split here client ?noautocmd () ~buffer ~enter ~config ~minimal_style =
+  open_ here client ?noautocmd () ~buffer ~enter ~config:(Split config) ~minimal_style
+;;
+
 module Statusline = Statusline [@@alert "-vcaml_do_not_export"]
 module Winbar = Statusline [@@alert "-vcaml_do_not_export"]
 module Statuscolumn = Statusline [@@alert "-vcaml_do_not_export"]
@@ -528,14 +592,14 @@ module Fast = struct
   ;;
 
   let eval_statuscolumn
-    here
-    client
-    t
-    ?max_width
-    ?fill_char
-    ~include_highlights
-    ~one_indexed_row
-    statuscolumn
+        here
+        client
+        t
+        ?max_width
+        ?fill_char
+        ~include_highlights
+        ~one_indexed_row
+        statuscolumn
     =
     Statusline.eval
       here

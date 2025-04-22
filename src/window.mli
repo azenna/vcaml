@@ -221,9 +221,27 @@ module Config : sig
     [@@deriving sexp_of]
   end
 
+  module Split : sig
+    module Direction : sig
+      type t =
+        | Left
+        | Right
+        | Above
+        | Below
+      [@@deriving sexp_of]
+    end
+
+    type t =
+      { win : Or_current.t
+      ; direction : Direction.t
+      }
+    [@@deriving sexp_of]
+  end
+
   type t =
     | Floating of Floating.t
     | External of External.t
+    | Split of Split.t
   [@@deriving sexp_of]
 end
 
@@ -253,6 +271,18 @@ val open_external
   -> buffer:Nvim_internal.Buffer.Or_current.t
   -> enter:bool
   -> config:Config.External.t
+  -> minimal_style:bool
+  -> t Deferred.Or_error.t
+
+(** Open a split window *)
+val open_split
+  :  Source_code_position.t
+  -> _ Client.t
+  -> ?noautocmd:bool
+  -> unit
+  -> buffer:Nvim_internal.Buffer.Or_current.t
+  -> enter:bool
+  -> config:Config.Split.t
   -> minimal_style:bool
   -> t Deferred.Or_error.t
 
