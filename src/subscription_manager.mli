@@ -6,7 +6,7 @@ module Ui_event := Nvim_internal.Ui_event
 (** This module is internal to VCaml. *)
 
 module Buffer_event : sig
-  type changedtick [@@deriving sexp_of] [@@immediate]
+  type changedtick [@@deriving sexp_of, bin_io] [@@immediate]
 
   type t =
     | Changedtick of changedtick
@@ -17,7 +17,7 @@ module Buffer_event : sig
         ; linedata : String.Utf8.t list
         ; more : bool
         }
-  [@@deriving sexp_of]
+  [@@deriving sexp_of, bin_io]
 
   module Private : sig
     val changedtick_eq : (changedtick, int) Type_equal.t

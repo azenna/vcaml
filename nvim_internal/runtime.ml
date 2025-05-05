@@ -2,7 +2,7 @@ open Core
 
 module type Nvim_id = sig
   type 'a phantom
-  type t = private int [@@deriving sexp_of]
+  type t = private int [@@deriving sexp_of, bin_io]
 
   include Comparable.S_plain with type t := t
   include Hashable.S_plain with type t := t
@@ -16,7 +16,7 @@ module type Nvim_id = sig
     type nonrec t =
       | Current
       | Id of t
-    [@@deriving sexp_of]
+    [@@deriving sexp_of, bin_io]
 
     include Msgpack.Msgpackable with type t := t
 
@@ -59,7 +59,7 @@ let make_nvim_id ~type_id ~name =
       type nonrec t =
         | Current
         | Id of t
-      [@@deriving sexp_of]
+      [@@deriving sexp_of, bin_io]
 
       (* This value is overridden later. *)
       let t = None

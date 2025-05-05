@@ -231,18 +231,14 @@ module Config : sig
       [@@deriving sexp_of]
     end
 
-    type t =
-      { win : Or_current.t
-      ; direction : Direction.t
-      }
-    [@@deriving sexp_of]
+    type t = { direction : Direction.t } [@@deriving sexp_of]
   end
 
   type t =
     | Floating of Floating.t
     | External of External.t
     | Split of Split.t
-  [@@deriving sexp_of]
+  [@@deriving sexp_of, bin_io]
 end
 
 (** Open a floating window. [enter] specifies whether the cursor should be placed in the

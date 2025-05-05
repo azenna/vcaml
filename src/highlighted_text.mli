@@ -3,11 +3,11 @@ module Chunk : sig
     { text : string
     ; hl_group : string option
     }
-  [@@deriving sexp_of]
+  [@@deriving sexp_of, bin_io]
 
   val to_msgpack : t -> Msgpack.t
 end
 
-type t = Chunk.t list [@@deriving sexp_of]
+type t = Chunk.t list [@@deriving sexp_of, bin_io]
 
 val to_msgpack : t -> Msgpack.t list

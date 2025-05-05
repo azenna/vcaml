@@ -13,7 +13,7 @@ module Event :
 (** A [changedtick] represents the edit number of the buffer. If you pass it to a function
     that updates the buffer contents, the contents will only be updated if the buffer has
     not changed since that changedtick. See `:h b:changedtick`. *)
-type changedtick = Event.changedtick [@@deriving sexp_of]
+type changedtick = Event.changedtick [@@deriving sexp_of, bin_io]
 
 module With_changedtick : sig
   type 'a t =

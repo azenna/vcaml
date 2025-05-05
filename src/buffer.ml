@@ -4,7 +4,7 @@ open Import
 include Nvim_internal.Buffer
 module Event = Subscription_manager.Buffer_event
 
-type changedtick = Event.changedtick [@@deriving sexp_of]
+type changedtick = Event.changedtick [@@deriving sexp_of, bin_io]
 
 let int_of_changedtick = Type_equal.conv Event.Private.changedtick_eq
 let changedtick_of_int = Type_equal.(conv (sym Event.Private.changedtick_eq))
@@ -97,15 +97,15 @@ let get_text here client t ~start_row ~start_col ~end_row ~end_col =
 ;;
 
 let set_text
-  here
-  client
-  ?changedtick
-  t
-  ~start_row
-  ~start_col
-  ~end_row
-  ~end_col
-  replacement
+      here
+      client
+      ?changedtick
+      t
+      ~start_row
+      ~start_col
+      ~end_row
+      ~end_col
+      replacement
   =
   Nvim_internal.nvim_buf_set_text
     ~buffer:t
@@ -257,15 +257,15 @@ let get_byte_offset_of_line here client t ~line:index =
 
 module Untested = struct
   let add_highlight
-    here
-    client
-    ?changedtick
-    t
-    ~namespace
-    ~hl_group
-    ~line
-    ~col_start
-    ~col_end
+        here
+        client
+        ?changedtick
+        t
+        ~namespace
+        ~hl_group
+        ~line
+        ~col_start
+        ~col_end
     =
     Nvim_internal.nvim_buf_add_highlight
       ~buffer:t
@@ -305,38 +305,38 @@ module Untested = struct
   end
 
   let set_extmark_internal
-    ~map_witness_f
-    here
-    client
-    ~buffer
-    ~namespace
-    ?id
-    ?changedtick
-    ~start_inclusive
-    ?end_exclusive
-    ?hl_group
-    ?virtual_text
-    ?virtual_text_pos
-    ?hide_virtual_text_when_overlaying_selection
-    ?virtual_lines
-    ?virtual_lines_pos
-    ?bypass_sign_and_number_columns
-    ?when_underlying_highlight_conflicts
-    ?extend_highlight_across_screen
-    ?ephemeral
-    ?start_gravity
-    ?end_gravity
-    ?priority
-    ?strict
-    ?sign_text
-    ?sign_hl_group
-    ?number_hl_group
-    ?line_hl_group
-    ?cursorline_hl_group
-    ?conceal
-    ?spell
-    ?ui_watched
-    ()
+        ~map_witness_f
+        here
+        client
+        ~buffer
+        ~namespace
+        ?id
+        ?changedtick
+        ~start_inclusive
+        ?end_exclusive
+        ?hl_group
+        ?virtual_text
+        ?virtual_text_pos
+        ?hide_virtual_text_when_overlaying_selection
+        ?virtual_lines
+        ?virtual_lines_pos
+        ?bypass_sign_and_number_columns
+        ?when_underlying_highlight_conflicts
+        ?extend_highlight_across_screen
+        ?ephemeral
+        ?start_gravity
+        ?end_gravity
+        ?priority
+        ?strict
+        ?sign_text
+        ?sign_hl_group
+        ?number_hl_group
+        ?line_hl_group
+        ?cursorline_hl_group
+        ?conceal
+        ?spell
+        ?ui_watched
+        ()
     =
     let open Deferred.Or_error.Let_syntax in
     let%bind buffer = get_buffer here client buffer in
@@ -506,17 +506,17 @@ module Untested = struct
   ;;
 
   let all_extmarks_internal
-    ~map_witness_f
-    ~details
-    here
-    client
-    ?start_inclusive
-    ?end_inclusive
-    ?limit
-    ?type_
-    ?hl_groups
-    t
-    ~namespace
+        ~map_witness_f
+        ~details
+        here
+        client
+        ?start_inclusive
+        ?end_inclusive
+        ?limit
+        ?type_
+        ?hl_groups
+        t
+        ~namespace
     =
     let%bind.Deferred.Or_error buffer = get_buffer here client t in
     let opts =

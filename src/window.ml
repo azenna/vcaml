@@ -94,7 +94,7 @@ module Config = struct
       | Whitespace
       | Shadow
       | Custom of Highlighted_text.t
-    [@@deriving sexp_of]
+    [@@deriving sexp_of, bin_io]
 
     let to_msgpack : t option -> Msgpack.t = function
       | None -> String "none"
@@ -141,13 +141,13 @@ module Config = struct
       | Left
       | Center
       | Right
-    [@@deriving sexp_of]
+    [@@deriving sexp_of, bin_io]
 
     type t =
       { pos : pos
       ; text : Highlighted_text.t
       }
-    [@@deriving sexp_of]
+    [@@deriving sexp_of, bin_io]
 
     let to_msgpack_map title =
       match title with
@@ -203,7 +203,7 @@ module Config = struct
         | Right
         | Above
         | Below
-      [@@deriving sexp_of]
+      [@@deriving sexp_of, bin_io]
 
       let to_msgpack : t -> Msgpack.t = function
         | Left -> String "left"
@@ -225,27 +225,17 @@ module Config = struct
       ;;
     end
 
-    type t =
-      { win : Or_current.t
-      ; direction : Direction.t
-      }
-    [@@deriving sexp_of]
+    type t = { direction : Direction.t } [@@deriving sexp_of, bin_io]
 
     let to_msgpack_map t =
       let msgpack = [ "split", Direction.to_msgpack t.direction ] in
-      let msgpack =
-        match t.win with
-        | Current -> msgpack
-        | Id win -> ("win", Type.to_msgpack Window win) :: msgpack
-      in
       String.Map.of_alist_exn msgpack
     ;;
 
     let of_msgpack_map map =
       let open Or_error.Let_syntax in
-      let%bind win = find_or_error_and_convert map "win" Or_current.of_msgpack in
       let%bind direction = find_or_error_and_convert map "split" Direction.of_msgpack in
-      return { win; direction }
+      return { direction }
     ;;
   end
 
@@ -256,7 +246,7 @@ module Config = struct
         | Top_right
         | Bottom_left
         | Bottom_right
-      [@@deriving sexp_of]
+      [@@deriving sexp_of, bin_io]
 
       let to_msgpack : t -> Msgpack.t = function
         | Top_left -> String "NW"
@@ -290,7 +280,7 @@ module Config = struct
               }
           | Relative_to_cursor_in_current_window of { pos : Position.t }
           | Relative_to_mouse of { pos : Position.t }
-        [@@deriving sexp_of]
+        [@@deriving sexp_of, bin_io]
 
         let to_msgpack_map t =
           let map =
@@ -409,7 +399,7 @@ module Config = struct
       ; border : Border.t option
       ; title : Title.t option
       }
-    [@@deriving sexp_of]
+    [@@deriving sexp_of, bin_io]
 
     let to_msgpack_map t =
       let map =
@@ -463,7 +453,7 @@ module Config = struct
       ; border : Border.t option
       ; title : Title.t option
       }
-    [@@deriving sexp_of]
+    [@@deriving sexp_of, bin_io]
 
     let to_msgpack_map t =
       let map =
@@ -499,7 +489,7 @@ module Config = struct
     | Floating of Floating.t
     | External of External.t
     | Split of Split.t
-  [@@deriving sexp_of]
+  [@@deriving sexp_of, bin_io]
 
   let of_msgpack_map map =
     let open Or_error.Let_syntax in

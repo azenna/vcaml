@@ -5,7 +5,7 @@ module Chunk = struct
     { text : string
     ; hl_group : string option
     }
-  [@@deriving sexp_of]
+  [@@deriving sexp_of, bin_io]
 
   let to_msgpack { text; hl_group } =
     match hl_group with
@@ -14,6 +14,6 @@ module Chunk = struct
   ;;
 end
 
-type t = Chunk.t list [@@deriving sexp_of]
+type t = Chunk.t list [@@deriving sexp_of, bin_io]
 
 let to_msgpack t = List.map t ~f:Chunk.to_msgpack
